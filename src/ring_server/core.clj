@@ -1,5 +1,5 @@
 (ns ring-server.core
-  "Starts Server"
+  "Starts Server and process requests"
   (:require [compojure.core :refer [defroutes POST]]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
@@ -8,7 +8,7 @@
             [ring-server.check :refer [validate-input]])
   (:gen-class))
 
-(defonce parameters ["a" "b" "c" "d"])
+(defonce parameters ["a" "b" "c" "d" "e"])
 
 (defn test-API
   "Example"
@@ -32,6 +32,6 @@
       (wrap-json-body {:keywords? true})))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Starts jetty server"
   [& args]
   (jetty/run-jetty app {:port 4001}))
