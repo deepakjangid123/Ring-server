@@ -3,6 +3,14 @@
   (:require [clojure.spec.alpha :as s]
             [ring-server.spec :as sp]))
 
+(defmacro <try>
+  ([body] `(<try> nil ~body))
+  ([input & body]
+   `(try
+      (do ~@body)
+      (catch Exception ex#
+        (or ~input ex#)))))
+
 (defn check-input
   "Checks whether input is in the expected form or not else throws an error"
   [input spec]
@@ -13,24 +21,21 @@
 (defn input-or-nil
   "Checks if input is in the expected form or not else returns nil"
   [input spec]
-  (try
+  (<try>
     (when-not (= ::s/invalid (s/conform spec input))
-      input)
-    (catch Exception e
-      e)))
+      input)))
 
 (defn read-string-except
   "1). Returns read-string'ed output
    2). If it returns a symbol then converts it into string
    3). If exception is there then returns the input itself"
   [in]
-  (try
+  (<try>
+    in
     (let [x (read-string in)]
       (cond
        (symbol? x) (str x)
-       :else x))
-    (catch Exception e
-      in)))
+       :else x))))
 
 (defn validate-input
   "Validates input and returns result"
@@ -46,5 +51,8 @@
                      ::sp/boolean)
         nil-fld (input-or-nil
                   (read-string-except (get input "d"))
-                  ::sp/number)]
-    (zipmap parameters [flds num-fld boolean-fld nil-fld])))
+                  ::sp/score)
+        str-fld (input-or-nil
+                  (read-string-except (get input "e"))
+                  ::sp/name)]
+    (zipmap parameters [flds num-fld boolean-fld nil-fld str-fld])))
